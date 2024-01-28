@@ -1,0 +1,16 @@
+print("area of triangle")
+l=int(input("enter the l value:"))
+b=int(input("enter the b value:"))
+c=(0.5*l*b)
+print(c)
+
+print("area of rectangle")
+l=int(input("enter the l value:"))
+b=int(input("enter the b value:"))
+c=(l*b)
+print(c)
+
+print("perimeter of circle")
+r=int(input("enter the radius:"))
+area=(2*3.14*r)
+print("area of the circle:",area)
