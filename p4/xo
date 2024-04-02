@@ -1,0 +1,136 @@
+import numpy as np
+import pygame
+import sys
+
+# Constants
+ROWS = 3
+COLUMNS = 3
+SQUARE_SIZE = 200
+LINE_WIDTH = 10
+CIRCLE_RADIUS = 60
+CIRCLE_LINE_WIDTH = 15
+X_LINE_WIDTH = 25
+SCREEN_WIDTH = COLUMNS * SQUARE_SIZE
+SCREEN_HEIGHT = ROWS * SQUARE_SIZE
+LINE_COLOR = (0, 0, 0)
+BACKGROUND_COLOR = (255, 255, 255)
+CIRCLE_COLOR = (255, 105, 180)
+X_COLOR = (255, 0, 0)
+AI_PLAYER = 2
+PLAYER = 1
+
+# Initialize the game board
+board = np.zeros((ROWS, COLUMNS))
+
+def draw_board():
+    for i in range(1, ROWS):
+        pygame.draw.line(screen, LINE_COLOR, (0, i * SQUARE_SIZE), (SCREEN_WIDTH, i * SQUARE_SIZE), LINE_WIDTH)
+    for i in range(1, COLUMNS):
+        pygame.draw.line(screen, LINE_COLOR, (i * SQUARE_SIZE, 0), (i * SQUARE_SIZE, SCREEN_HEIGHT), LINE_WIDTH)
+
+def draw_symbols():
+    for row in range(ROWS):
+        for col in range(COLUMNS):
+            if board[row][col] == PLAYER:
+                draw_circle(row, col)
+            elif board[row][col] == AI_PLAYER:
+                draw_cross(row, col)
+
+def draw_circle(row, col):
+    pygame.draw.circle(screen, CIRCLE_COLOR, (col * SQUARE_SIZE + SQUARE_SIZE // 2, row * SQUARE_SIZE + SQUARE_SIZE // 2), CIRCLE_RADIUS, CIRCLE_LINE_WIDTH)
+
+def draw_cross(row, col):
+    pygame.draw.line(screen, X_COLOR, (col * SQUARE_SIZE + X_LINE_WIDTH, row * SQUARE_SIZE + X_LINE_WIDTH), 
+                     (col * SQUARE_SIZE + SQUARE_SIZE - X_LINE_WIDTH, row * SQUARE_SIZE + SQUARE_SIZE - X_LINE_WIDTH), X_LINE_WIDTH)
+    pygame.draw.line(screen, X_COLOR, (col * SQUARE_SIZE + X_LINE_WIDTH, row * SQUARE_SIZE + SQUARE_SIZE - X_LINE_WIDTH), 
+                     (col * SQUARE_SIZE + SQUARE_SIZE - X_LINE_WIDTH, row * SQUARE_SIZE + X_LINE_WIDTH), X_LINE_WIDTH)
+
+def check_winner(player):
+    # Check rows and columns
+    for i in range(ROWS):
+        if np.all(board[i, :] == player) or np.all(board[:, i] == player):
+            return True
+
+    # Check diagonals
+    if np.all(np.diag(board) == player) or np.all(np.diag(np.fliplr(board)) == player):
+        return True
+
+    return False
+
+def is_board_full():
+    return np.all(board != 0)
+
+def get_available_moves():
+    return [(i, j) for i in range(ROWS) for j in range(COLUMNS) if board[i][j] == 0]
+
+def ai_move():
+    moves = get_available_moves()
+    best_score = -np.inf
+    best_move = None
+    for move in moves:
+        board[move] = AI_PLAYER
+        score = minimax(board, 0, False)
+        board[move] = 0
+        if score > best_score:
+            best_score = score
+            best_move = move
+    return best_move
+
+def minimax(board, depth, is_maximizing):
+    if check_winner(AI_PLAYER):
+        return 1
+    elif check_winner(PLAYER):
+        return -1
+    elif is_board_full():
+        return 0
+
+    if is_maximizing:
+        max_eval = -np.inf
+        for move in get_available_moves():
+            board[move] = AI_PLAYER
+            eval = minimax(board, depth + 1, False)
+            board[move] = 0
+            max_eval = max(max_eval, eval)
+        return max_eval
+    else:
+        min_eval = np.inf
+        for move in get_available_moves():
+            board[move] = PLAYER
+            eval = minimax(board, depth + 1, True)
+            board[move] = 0
+            min_eval = min(min_eval, eval)
+        return min_eval
+
+pygame.init()
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Tic Tac Toe")
+
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if not check_winner(PLAYER) and not check_winner(AI_PLAYER) and not is_board_full():
+                pos = pygame.mouse.get_pos()
+                col = pos[0] // SQUARE_SIZE
+                row = pos[1] // SQUARE_SIZE
+                if board[row][col] == 0:
+                    board[row][col] = PLAYER
+                    if check_winner(PLAYER):
+                        print("Player wins!")
+                    elif is_board_full():
+                        print("It's a tie!")
+                    else:
+                        ai_pos = ai_move()
+                        board[ai_pos] = AI_PLAYER
+                        if check_winner(AI_PLAYER):
+                            print("AI wins!")
+                        elif is_board_full():
+                            print("It's a tie!")
+
+    screen.fill(BACKGROUND_COLOR)
+    draw_board()
+    draw_symbols()
+    pygame.display.update()

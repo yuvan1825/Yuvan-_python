@@ -1,0 +1,455 @@
+# Import Libraries and read Dataset:
+
+import pandas as pd
+
+import numpy as np
+
+import seaborn as sns
+
+import matplotlib.pyplot as plt
+
+%matplotlib inline
+
+# Import dataset:
+
+from google.colab import drive
+
+drive.mount('/content/drive/")
+
+df=pd.read_csv("/content/drive/MyDrive/heart.csv") dfdf.drop(['oldpeak', 'slp', 'thall'],axis=1)
+
+df.head()
+
+# Data Analysis:
+
+df.shape
+
+df.isnull().sum()
+
+df.corr() sns.heatmap(df.corr())
+
+#We will do Uni and Bi variate analysis on our Features:
+
+plt.figure(figsize=(20, 10))
+
+plt.title("Age of Patients")
+
+plt.xlabel("Age")
+
+sns.countplot(x='age',data=df)
+
+plt.figure(figsize=(20, 10))
+
+plt.title("Sex of Patients, 0-Female and 1=Male")
+
+sns.countplot(x='sex',data=df)
+
+cp_data= df['cp'].value_counts().reset_index()
+from sklearn.metrics import confusion_matrix
+
+encoded_ytest-lbl.fit_transform(y_test)
+
+Y_pred1 = logreg.predict(x_test)
+
+Ir_conf_matrix confusion_matrix(encoded_ytest,Y_pred1)
+
+Ir_acc_score accuracy_score(encoded_ytest, Y_pred1)
+
+Y_pred1
+
+Ir _conf_matrix
+
+print(lr_acc_score*100,"%")
+
+# Decision Tree:
+
+from sklearn.tree import Decision Tree Classifier
+
+tree= Decision TreeClassifier()
+
+tree.fit(x_train.encoded_y)
+
+ypred2-tree.predict(x_test)
+
+encoded_ytest Ibl.fit_transform(y_test)
+
+tree_conf_matrix = confusion_matrix(encoded_ytest, ypred2)
+
+tree_acc_score = accuracy_score(encoded_ytest, ypred2)
+
+tree conf matrix
+
+print(tree_acc_score*100,"%").
+
+#Random Forest:
+
+from sklearn.ensemble import Random ForestClassifier
+
+rf Random ForestClassifier()
+
+rf.fit(x_train,encoded_y)
+
+ypred3rf.predict(x_test)
+
+rf_conf_matrix = confusion_matrix(encoded_ytest,ypred3)
+
+rf_acc_score = accuracy_score(encoded_ytest, ypred3)
+
+rf_conf_matrix
+
+print(rf acc score*100,"%")
+
+# K Nearest Neighbor:
+
+# We have to select what K we will use for maximum accuracy:
+
+from sklearn.neighbors import KNeighborsClassifier
+
+error_rate=[]
+for i in range(1,40):
+
+knn-KNeighborsClassifier(n_neighbors-i)
+
+knn.fit(x_train.encoded_y)
+
+pred-knn.predict(x_test)
+
+error_rate.append(np.mean(pred != encoded_ytest))
+
+plt.figure(figsize=(10,6))
+
+plt.plot(range(1,40), error_rate,color='blue', linestyle='dashed', marker='o', markerfacecolor='red', markersize=10)
+
+plt.xlabel('K Value')
+
+plt.ylabel('Error rate')
+
+plt.title('To check the correct value of k')
+
+plt.show()
+
+#As we see from the graph we should select K-12 as it gives the best error rate:
+
+knn- KNeighborsClassifier(n_neighbors=12)
+
+knn.fit(x_train,encoded_y)
+
+ypred4-knn.predict(x_test)
+
+knn_conf_matrix = confusion_matrix(encoded_ytest,ypred4)
+
+knn_acc_score accuracy_score(encoded_ytest, ypred4)
+
+knn conf matrix
+
+print(knn_acc_score*100,"%")
+
+# Support Vector Machine:
+
+from sklearn import svm
+
+svmsvm.SVC()
+
+svm.fit(x_train,encoded_y)
+
+ypred5= svm.predict(x_test)
+
+svm_conf_matrix = confusion_matrix(encoded_ytest,ypred5)
+
+svm_acc_score accuracy_score(encoded_ytest, ypred5)
+
+svm_conf_matrix
+
+print(svm_acc_score*100,"%")
+#Lets us see our model accuracy in table form:
+
+model_acc= pd.DataFrame({'Model': ['Logistic Regression', 'Decision Tree', 'Random Fo rest', 'K Nearest Neighbor', 'SVM'],
+
+'Accuracy': [Ir acc score*100,tree acc score 100,rf acc score*100,kn n_acc_score*100,svm_acc_score*100]})
+
+model_ace model_acc.sort_values(by=['Accuracy'], ascending=False)
+
+model acc
+
+#AdaBoost Classifier:
+
+#Let us use one more Techniques known as AdaBoost, this is a Boosting technique which uses multiple models for better accuracy.
+
+from sklearn.ensemble import AdaBoostClassifier
+
+adab AdaBoostClassifier(base_estimator-svm.n_estimators-100, algorithm='SAMME' learning_rate=0.01,random_state=0)
+
+adab.fit(x_train,encoded_y)
+
+ypred6-adab.predict(x_test)
+
+adab_conf_matrix confusion_matrix(encoded_ytest,ypred6)
+
+adab_acc_score accuracy_score(encoded_ytest, ypred6)
+
+adab conf matrix
+
+print(adab_acc_score*100,"%")
+
+adab.score(x train, encoded y)
+
+adab.score(x test, encoded ytest)
+
+#We will use Grid Seach CV for HyperParameter Tuning:
+
+# Grid Search CV for top 3 algorithms for Hyperparameter Tuning:
+
+from sklearn.model_selection import GridSearchCV
+
+model acc
+
+# Logistic Regression - Hyperparameter Tuning:
+
+param_grid={
+
+'solver': ['newton-cg', 'lbfgs', 'liblinear','sag', 'saga'],
+
+'penalty': ['none', '11', '12', 'elasticnet'], 'C': [100, 10, 1.0, 0.1, 0.01]}
+grid1=GridSearchCV(LogisticRegression(),param_grid)
+
+grid1.fit(x_train.encoded_y)
+
+grid1.best_params_
+
+#Let us apply these para in the model:
+
+logreg1-LogisticRegression(C=0.01, penalty='12',solver 'liblinear')
+
+logreg1.fit(x_train, encoded _y)
+
+logreg_predlogreg1.predict(x_test)
+
+logreg_pred_conf_matrix confusion_matrix(encoded_ytest,logreg_pred)
+
+logreg_pred_acc_score accuracy_score(encoded_ytest, logreg_pred)
+
+logreg_pred_conf_matrix
+
+print(logreg pred_acc_score 100,"%")
+
+#K Nearest Neighbor - Hyperparameter Tuning
+
+n_neighbors range(1, 21, 2)
+
+weights = ['uniform', 'distance']
+
+metric ['euclidean', 'manhattan', 'minkowski']
+
+griddict(n_neighbors=n_neighbors, weights-weights,metric-metric)
+
+from sklearn.model_selection import RepeatedStratifiedKFold
+
+cv = RepeatedStratifiedKFold(n_splits=10, n_repeats-3, random_state=1)
+
+grid_search = GridSearchCV(estimator-knn, param_grid-grid, n_jobs- 1, cv-cv, scoring-'accuracy',error_score=(0)
+
+grid_search.fit(x_train,encoded_y)
+
+grid_search.best_params_
+
+#Let us apply these para in the model:
+
+knn KNeighborsClassifier(n_neighbors 12,metric 'manhattan', weights 'distance')
+
+knn.fit(x_train.encoded_y)
+
+knn_pred knn.predict(x_test)
+
+knn pred conf_matrix confusion_matrix(encoded_ytest,knn pred)
+
+knn_pred_acc_score accuracy_score(encoded_ytest, knn_pred)
+
+knn_pred_conf_matrix
+
+print(knn pred_acc score 100,"%")
+[19-03-2024 10:56] Dinesh BCA Class: #Support Vector Machine - Hyperparameter Tuning:
+
+kernel['poly', 'rbf', 'sigmoid']
+
+C[50, 10, 1.0, 0.1, 0.01]
+
+gamma = ['scale']
+
+griddict(kernel-kernel,C-C.gamma-gamma)
+
+cv RepeatedStratifiedKFold(n_splits-10, n_repeats-3, random_state=1)
+
+grid_search GridSearchCV(estimator-svm, param_grid-grid, n_jobs- 1, cv-ev, scoring 'accuracy',error_score-0)
+
+grid_search.fit(x_train,encoded_y)
+
+grid_search.best_params_
+
+#Let us apply these para in the model;
+
+from sklearn.svm import SVC
+
+svc=SVC(C=0.1, gamma- 'scale', kernel= 'sigmoid')
+
+svc.fit(x train,encoded y).
+
+svm pred sve.predict(x test)
+
+svm_pred_conf_matrix confusion_matrix(encoded_ytest,svm_pred)
+
+svm_pred_acc_score accuracy_score(encoded_ytest, svm_pred)
+
+svm pred conf matrix
+
+print(svm_pred acc score 100,"%")
+
+#Final Verdict:
+
+#After comparing all the models the best performing model is:
+
+Logistic Regression with no Hyperparameter tuning
+
+logreg LogisticRegression()
+
+logreg LogisticRegression()
+
+logreg.fit(x_train, encoded y)
+
+y_pred 1
+
+Ir conf matrix
+
+print(Ir_acc_score* 100,"%")
+
+#Confusion matrix for the model:
+
+options = ["Disease", 'No Disease']
+[19-03-2024 10:57] Dinesh BCA Class: fig, ax plt.subplots()
+
+imax.imshow(Ir_conf_matrix, emap 'Set3', interpolation-'nearest')
+
+#We want to show all ticks...
+
+ax.set_xticks(np.arange(len(options)))
+
+ax.set_yticks(np.arange(len(options)))
+
+#... and label them with the respective list entries
+
+ax.set_xticklabels(options)
+
+ax.set_yticklabels(options)
+
+#Rotate the tick labels and set their alignment..
+
+plt.setp(ax.get_xticklabels(), rotation-45, ha="right",
+
+rotation_mode="anchor")
+
+#Loop over data dimensions and create text annotations.
+
+for i in range(len(options)):
+
+for j in range(len(options)):
+
+textax.text(j, i, Ir_conf_matrix[i, j].
+
+ha-"center", va="center", color="black")
+
+ax.set_title("Confusion Matrix of Logistic Regression Model")
+
+fig.tight_layout()
+
+plt.xlabel('Model Prediction')
+
+plt.ylabel('Actual Result')
+
+plt.show()
+
+print("ACCURACY of our model is ",lr_acc_score*100,"%")
+
+# We have successfully made our model which predicts whether a person is having a risk of Heart disease or not with 85.7% accuracy.
+
+Import pickle
+
+pickle.dump(logreg.open('heart.pkl','wb'))
+
+#Installing Eval ML:
+
+!pip install evalml
+[19-03-2024 10:58] Dinesh BCA Class: #Let us load our dataset:
+
+df-pd.read_csv("/content/drive/MyDrive/heart.csv")
+
+df.head()
+
+#Let us split our Data Set into Dependent i.e our Targer variable and independent.
+
+variable:
+
+x= df.iloc[:,:-1]
+
+X
+
+ydf.iloc[:,-1:]
+
+ylbl.fit_transform(y)
+
+y
+
+# Importing Eval ML Library:
+
+Import evalml
+
+X_train, X_test, y_train, y_test = evalml.preprocessing.split_data(x, y, problem_type="b inary')
+
+evalml.problem types. Problem Types.all_problem_types
+
+# Running the Auto ML to select the best Algorithm:
+
+from evalml.automl import AutoMLSearch
+
+automl = AutoMLSearch(X_train=X_train, y_train-y_train, problem_type='binary')
+
+automl.search()
+
+automl.rankings
+
+automl.best pipeline
+
+best_pipeline-automl.best_pipeline
+
+#We can have a detailed description of our Best Selected Model:
+
+automl.describe_pipeline(automl.rankings.iloc[0]["id"])
+
+best_pipeline.score(X_test, y_test, objectives=["auc","fl", "Precision", "Recall"])
+
+#Now if we want to build our model for a specific Objective we can do it:
+
+automl_aue AutoMLSearch(X_train=X_train, y_train-y_train, problem_type='binary', objective-auc',
+[19-03-2024 10:59] Dinesh BCA Class: additional_objectives=['fl', 'precision'],
+
+max batches-1.
+
+optimize thresholds-True)automi auc.search()
+
+automl_auc.rankings
+
+automl_auc.describe_pipeline(automl_auc.rankings.iloc[0]["id"]) best pipeline_auc automl_auc.best pipeline.
+
+#get the score on holdout data
+
+best_pipeline_auc.score(X_test, y_test, objectives=["auc"])
+
+#We got an 88.5% AUC Score which is the highest of all
+
+#Save the model:
+
+best_pipeline.save("model.pkl")
+
+#Loading our model:
+
+final_model automl.load('model.pkl')
+
+final_model.predict_proba(X_test)
