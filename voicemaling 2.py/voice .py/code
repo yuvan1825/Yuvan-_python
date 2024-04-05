@@ -1,0 +1,246 @@
+import streamlit as st
+import streamlit_authenticator as stauth
+import yaml
+import helper
+from yaml.loader import SafeLoader
+with open('config.yaml') as file:
+config = yaml.load(file, Loader=SafeLoader)
+authenticator = stauth.Authenticate(
+config['credentials'],
+config['cookie']['name'],
+config['cookie']['key'],
+config['cookie']['expiry_days'],
+config['preauthorized']
+)
+def detect_speech_for_choice(choices):
+while 1:
+user_choice = helper.speech2text()
+if not user_choice:
+helper.text2speech("Please speak again")
+elifuser_choice.lower() in choices:
+helper.text2speech(f"You selected
+ {
+user_choice
+}")
+return user_choice
+else:
+helper.text2speech(f"You selected 
+{
+user_choice
+}.
+Please speak again")
+def detect_speech_for_raw_text():
+while 1:
+user_choice = helper.speech2text()
+if not user_choice:
+helper.text2speech("Please speak again")
+else:
+return user_choice
+if "voice_enabler" not in st.session_state: 
+st.session_state.voice_enabler = False
+def voice_enabler_callback():
+st.session_state.voice_enabler = True
+if "send_email" not in st.session_state: 
+st.session_state.send_email = False 
+def send_email_callback():
+ st.session_state.send_email = True
+c = st.sidebar.selectbox(label='Choose',options=['Login','Register'])
+if c == 'Login':
+name, authentication_status, username = authenticator.login('Login', 'main')
+if authentication_status:
+authenticator.logout('Logout', 'sidebar')
+st.markdown(f'Welcome *{name}*')
+sender_email = st.text_input("Enter your email id", value="")
+sender_password = st.text_input("Enter your pasword", value="", type='password')
+if st.button('voice_enabler',on_click=voice_enabler_callback) or 
+st.session_state.voice_enabler:
+st.markdown("*Speak send email for sending email*")
+st.markdown("*Speak read email for reading email*")
+helper.text2speech("Speak send email for sending email or read email for reading 
+email")
+helper.text2speech("Speak now")
+st.markdown("Speak now")
+user_choice = helper.detect_speech_for_choice(['send email','read email'])
+st.markdown(f"You selected {user_choice}")
+st.markdown('=='*40)
+st.markdown('=='*40)
+if user_choice.lower() == 'send email':
+st.markdown("*Speak subject of email*")
+helper.text2speech("Speak subject of email")
+helper.text2speech("Speak now")
+st.markdown("Speak now")
+email_subject = helper.detect_speech_for_raw_text()
+helper.text2speech(f"Email subject : {email_subject}")
+st.markdown(f"Email subject : {email_subject}")
+st.markdown('=='*40)
+st.markdown('=='*40)
+st.markdown("*Speak body of email*")
+helper.text2speech("Speak body of email")
+helper.text2speech("Speak now")
+st.markdown("Speak now")
+email_body = helper.detect_speech_for_raw_text()
+helper.text2speech(f"Email body : {email_body}")
+st.markdown(f"Email body : {email_body}")
+st.markdown('=='*40)
+st.markdown('=='*40)
+st.markdown("*Speak receiver email address*")
+helper.text2speech("Speak receiver email address")
+helper.text2speech("Speak now")
+st.markdown("Speak now")
+receiver_email = detect_speech_for_raw_text().
+lower().
+replace(' ','').replace('dot','.')
+helper.text2speech(f"Receiver email: {receiver_email}")
+st.markdown(f"Receiver email: {receiver_email}")
+helper.send_email_(sender_email,sender_password,receiver_email,email_subject,rece
+iver_email)
+else:
+st.markdown("*Speak receiver email address*")
+helper.text2speech("Speak receiver email address")
+helper.text2speech("Speak now")
+st.markdown("Speak now")
+receiver_email = detect_speech_for_raw_text().lower().replace(' ','').replace('dot','.')
+helper.text2speech(f"Receiver email: {receiver_email}")
+st.markdown(f"Receiver email: {receiver_email}")
+emailsub,emailbody = helper.read_email(sender_email,sender_password, 
+receiver_email)
+st.markdown(f"Email subject is {emailsub}")
+st.markdown(f"Email body is {emailbody}")
+helper.text2speech(f"EMail subject is {emailsub}")
+helper.text2speech(f"EMail body is {emailbody}")
+elifauthentication_status is False:
+st.error('Username/password is incorrect')
+elifauthentication_status is None:
+st.warning('Please enter your username and password')
+else:
+if st.session_state["authentication_status"]:
+st.markdown(f'You are already logged in as {st.session_state["name"]}')
+else:
+try:
+ if authenticator.register_user('Register user', preauthorization=False):
+st.success('User registered successfully')
+with open('config.yaml', 'w') as file:
+yaml.dump(config, file, default_flow_style=False)
+except Exception as e:
+st.error(e)
+import smtplib
+import imaplib
+import email 
+import base64 
+import time
+import quopri
+from email.mime.text import MIMEText
+from datetime import datetime 
+import pyttsx3 
+import speech_recognition as sr
+def text2speech(command): 
+engine = pyttsx3.init() 
+engine.say(command)
+engine.runAndWait() 
+def speech2text(): 
+r = sr.Recognizer() 
+with sr.Microphone() as source: 
+r.adjust_for_ambient_noise(source) 
+audio = r.listen(source) 
+try: 
+return r.recognize(audio) 
+except LookupError: 
+return None
+def detect_speech_for_choice(choices):
+while 1: 
+user_choice = speech2text() 
+if not user_choice:
+text2speech("Please speak again")
+elifuser_choice.lower() in choices:
+text2speech(f"You selected {user_choice}")
+return user_choice
+else:
+text2speech(f"You selected {
+user_choice}.
+Please speak again
+")
+def detect_speech_for_raw_text():
+while 1:
+user_choice = speech2text()
+if not user_choice:
+ text2speech("Please speak again")
+else:
+return user_choice
+def send_email(sender_email,sender_password,recipient_email,subject,body):
+smtp_server = "smtp.gmail.com"
+smtp_port = 587 # default for TLS
+server = smtplib.SMTP(smtp_server, smtp_port)
+server.starttls()
+server.login(sender_email, sender_password
+message = f"Subject: {subject}\n\n{body}"
+server.sendmail(sender_email, recipient_email, message)
+text2speech("Email sent successfully")
+server.quit()
+def read_email(login_email, login_password, sender_email):
+imap_server = "imap.gmail.com"
+imap_port = 993 # default for SSL
+server = imaplib.IMAP4_SSL(imap_server, imap_port)
+server.login(login_email, login_password)
+server.select("INBOX")# Search for emails from the specified sender
+status, message_ids = server.search(None, f'FROM "{sender_email}"')
+if status == "OK":
+print(f"Found
+{
+len(message_ids[0].
+split())
+}messages from 
+{
+sender_email
+}:")
+for message_id in message_ids[0].split():# Fetch the message header and body
+status, message_data = server.fetch(message_id, "(BODY.PEEK[])")
+if status == "OK":
+
+message = email.message_from_bytes(message_data[0][1])
+subject = message["Subject"]
+sent_date = message["Date"]
+email_sub = subject
+print("Sent:", datetime.strptime(sent_date, "%a, %d %b %Y %H:%M:%S 
+%z").strftime("%Y-%m-%d %H:%M:%S"))
+for part in message.walk():
+ 
+
+content_type = part.get_content_type()
+content_transfer_encoding = part.get("Content-Transfer-Encoding")
+if content_type == "text/plain":
+if content_transfer_encoding == "base64":
+
+
+body = base64.urlsafe_b64decode(part.get_payload()).decode("utf-8")
+email_body = body
+elifcontent_transfer_encoding == "quoted-printable":
+
+body = quopri.decodestring(part.get_payload()).decode("utf-8")
+email_body = body
+elifcontent_transfer_encoding is None:
+
+body = part.get_payload(decode=True).decode("utf-8")
+email_body = body
+else:
+email_body = body
+else:
+email_body = 'No email found'
+server.close()
+server.logout()
+return email_sub,email_body
+def :
+send_email_(sender_email,sender_password,receiver_email,email_subject,rec_email)
+ 
+send_email(sender_email,sender_password,receiver_email,email_subject,rec_email)
+ 
+
+ if _name_ == '_main_':
+print("*Speak send email for sending email*")
+print("*Speak read email for reading email*")
+text2speech("Speak send email for sending email or read email for reading email")
+ 
+
+text2speech("Speak now")
+print("Speak now")
+user_choice = detect_speech_for_choice(['send email','read email'])
+print(f"You selected {user_choice}"
